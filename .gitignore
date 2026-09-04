@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+rh_ats.db
+rh_ats.db-journal
+backups/
+.env
+*.xlsx
+.chave_secreta
+
+# complementos
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.zip
+*.bak
+.vscode/

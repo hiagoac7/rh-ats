@@ -1,0 +1,76 @@
+# Publicacao do ATS com banco PostgreSQL e HTTPS automatico.
+#
+# Antes de subir, crie um arquivo .env ao lado deste, com:
+#   POSTGRES_PASSWORD=uma-senha-forte
+#   SECRET_KEY=uma-chave-longa-e-aleatoria
+#   DOMINIO=ats.suaempresa.com.br
+#   EMAIL_ADMIN=ti@suaempresa.com.br
+#
+# Depois:  docker compose up -d
+
+services:
+  banco:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: rh_ats
+      POSTGRES_USER: ats
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: America/Sao_Paulo
+    volumes:
+      - dados_banco:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ats -d rh_ats"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sistema:
+    build: .
+    restart: always
+    depends_on:
+      banco:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://ats:${POSTGRES_PASSWORD}@banco:5432/rh_ats
+      SECRET_KEY: ${SECRET_KEY}
+      TOKEN_EXPIRE_MIN: 480
+      TZ: America/Sao_Paulo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ats.rule=Host(`${DOMINIO}`)"
+      - "traefik.http.routers.ats.entrypoints=websecure"
+      - "traefik.http.routers.ats.tls.certresolver=le"
+      - "traefik.http.services.ats.loadbalancer.server.port=8000"
+      # nao acumular resposta: os avisos de tempo real precisam sair na hora
+      - "traefik.http.services.ats.loadbalancer.responseforwarding.flushinterval=100ms"
+
+  # Cuida do HTTPS sozinho (certificado gratuito, renovado automaticamente)
+  proxy:
+    image: traefik:v3.1
+    restart: always
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.email=${EMAIL_ADMIN}"
+      - "--certificatesresolvers.le.acme.storage=/certificados/acme.json"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certificados:/certificados
+
+volumes:
+  # ATENCAO: 'dados_banco' guarda TODO o banco do RH.
+  # Para desligar o sistema use:      docker compose down
+  # NUNCA use:                        docker compose down -v
+  #   (o -v apaga os volumes e, com eles, todos os dados)
+  dados_banco:
+  certificados:

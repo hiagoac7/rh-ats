@@ -1,0 +1,9 @@
+Esta pasta guarda as bibliotecas que o front-end usa (React, Babel, Tailwind,
+Chart.js), servidas pelo proprio servidor.
+
+Para preencher: rode o "baixar_bibliotecas.bat" (precisa de internet uma vez).
+
+Enquanto ela estiver vazia, o sistema busca essas bibliotecas na internet
+automaticamente e continua funcionando — so fica dependente de rede externa.
+
+Nao edite os arquivos .js daqui: eles sao substituidos a cada download.
