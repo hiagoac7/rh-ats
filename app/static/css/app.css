@@ -1,0 +1,124 @@
+
+    :root{
+      --ouro:#c8960c; --ouro-claro:#e0ab1c; --ouro-fraco:#fdf6e3;
+      --ink:#1c1917; --ink-2:#57534e; --ink-3:#a8a29e;
+      --paper:#fafaf9; --linha:#eae7e2;
+    }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+           background:var(--paper); color:var(--ink); -webkit-font-smoothing:antialiased;
+           font-size:15px; line-height:1.6; letter-spacing:-0.006em; }
+    main{
+      position:relative;
+      background:
+        radial-gradient(90% 55% at 12% -8%,  rgba(224,171,28,.055), transparent 60%),
+        radial-gradient(70% 50% at 100% 0%,  rgba(120,113,108,.05), transparent 55%),
+        radial-gradient(60% 45% at 50% 105%, rgba(224,171,28,.03),  transparent 60%),
+        var(--paper);
+    }
+    .t-titulo   { font-size:23px; font-weight:700; letter-spacing:-0.022em; color:var(--ink); }
+    .t-secao    { font-size:14px; font-weight:600; letter-spacing:-0.01em; color:var(--ink); }
+    .t-corpo    { font-size:14px; color:var(--ink-2); }
+    .t-apoio    { font-size:12.5px; color:var(--ink-3); }
+    .t-rotulo   { font-size:11px; font-weight:600; letter-spacing:.06em;
+                  text-transform:uppercase; color:var(--ink-3); }
+    .num        { font-variant-numeric:tabular-nums; }
+    *::-webkit-scrollbar{height:9px;width:9px}
+    *::-webkit-scrollbar-track{background:transparent}
+    *::-webkit-scrollbar-thumb{background:#ddd8d0;border-radius:99px;border:2px solid transparent;background-clip:content-box}
+    *::-webkit-scrollbar-thumb:hover{background:#c4bdb2;background-clip:content-box}
+    .card-cand{transition:box-shadow .18s cubic-bezier(.4,0,.2,1), transform .18s cubic-bezier(.4,0,.2,1)}
+    .card-cand:hover{transform:translateY(-2px)}
+    .card-cand:active{cursor:grabbing;transform:scale(.98)}
+    .col-drop{transition:background .15s, box-shadow .15s}
+    .col-drop.over{background:var(--ouro-fraco);box-shadow:inset 0 0 0 2px var(--ouro-claro)}
+    .sem-barra{scrollbar-width:none;-ms-overflow-style:none}
+.sem-barra::-webkit-scrollbar{display:none}
+.surface{position:relative;background:#fff;border:1px solid var(--linha);border-radius:16px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 1px 2px rgba(28,25,23,.03),
+        0 4px 12px -6px rgba(28,25,23,.06),
+        0 16px 36px -20px rgba(28,25,23,.10)}
+    .surface-hover{transition:box-shadow .22s cubic-bezier(.4,0,.2,1),border-color .22s,transform .22s}
+    .surface-hover:hover{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.95),
+        0 2px 5px rgba(28,25,23,.04),
+        0 10px 24px -10px rgba(28,25,23,.13),
+        0 24px 48px -24px rgba(200,150,12,.16);
+      border-color:#e3ddd2; transform:translateY(-2px)}
+    .row-hover{transition:background .14s ease}
+    .brilho-acao{transition:box-shadow .2s,transform .12s}
+    .brilho-acao:hover{box-shadow:0 10px 26px -10px rgba(28,25,23,.55),
+                                  0 0 0 1px rgba(224,171,28,.22),
+                                  0 6px 30px -12px rgba(224,171,28,.35)}
+    .num-destaque{text-shadow:0 0 22px rgba(224,171,28,.18)}
+    .chip-luz{box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 1px 2px rgba(28,25,23,.04)}
+    .row-hover:hover{background:#fdfbf4}
+    tbody tr:last-child td:first-child{border-bottom-left-radius:12px}
+    tbody tr:last-child td:last-child{border-bottom-right-radius:12px}
+    .fade-in{animation:fade .22s ease-out}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .modal-in{animation:pop .18s cubic-bezier(.34,1.4,.64,1)}
+    @keyframes pop{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+    .dl dt{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#a8a29e;font-weight:600}
+    .dl dd{font-size:14.5px;color:#292524;margin:2px 0 0;word-break:break-word}
+    .esqueleto{background:linear-gradient(90deg,#f2efea 25%,#e9e5df 37%,#f2efea 63%);
+      background-size:400% 100%;animation:brilho 1.4s ease infinite;border-radius:8px}
+    @keyframes brilho{0%{background-position:100% 50%}100%{background-position:0 50%}}
+    .aparece{animation:sobe .28s cubic-bezier(.16,1,.3,1) both}
+    @keyframes sobe{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @keyframes entraAviso{from{opacity:0;transform:translateX(16px) scale(.98)}to{opacity:1;transform:none}}
+    .avisa{animation:entraAviso .22s cubic-bezier(.2,.8,.3,1) both}
+    @keyframes girar{to{transform:rotate(360deg)}}
+    .tabela .seta{opacity:0;transition:opacity .15s}
+    .tabela:hover .seta{opacity:.35}
+    .tabela .seta.ativa,.tabela:hover .seta.ativa{opacity:1}
+    .tabela th button:focus-visible{outline:2px solid var(--ouro);outline-offset:-2px;border-radius:6px}
+    .animate-spin{animation:girar .7s linear infinite}
+    @media (prefers-reduced-motion: reduce){
+      .avisa,.animate-spin,.aparece,.sobe,.troca-aba,.fade-in,.modal-in,.brilho{animation:none!important}
+      .surface-hover:hover,.card-cand:hover{transform:none!important}
+    }
+    :where(button,a,[role="button"]):focus-visible,
+    :where(input,select,textarea):focus-visible{
+      outline:2px solid var(--ouro); outline-offset:2px; border-radius:8px}
+    table td,table th{font-variant-numeric:tabular-nums}
+    .troca-aba{animation:sobe .26s cubic-bezier(.16,1,.3,1) both}
+    .login-fundo{
+      position:relative; overflow:hidden;
+      background:
+        radial-gradient(140% 100% at 50% -20%, #221f1c 0%, transparent 55%),
+        #121110;
+    }
+    .login-fundo::before{
+      content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+      background-image:linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+      background-size:56px 56px;
+      mask-image:radial-gradient(70% 55% at 50% 40%, #000 0%, transparent 100%);
+      -webkit-mask-image:radial-gradient(70% 55% at 50% 40%, #000 0%, transparent 100%);
+    }
+    .brilho{position:absolute;border-radius:9999px;filter:blur(120px);pointer-events:none}
+    .brilho-1{width:min(60vw,760px);aspect-ratio:1.4;top:-26%;left:50%;transform:translateX(-50%);
+      background:radial-gradient(circle,rgba(200,150,12,.16),rgba(200,150,12,0) 70%);
+      animation:respira 16s ease-in-out infinite}
+    @keyframes respira{0%,100%{opacity:.75}50%{opacity:1}}
+    .logo-brilha{box-shadow:0 6px 20px -8px rgba(200,150,12,.55), inset 0 1px 0 rgba(255,255,255,.22)}
+    .login-fundo input:-webkit-autofill,
+    .login-fundo input:-webkit-autofill:hover,
+    .login-fundo input:-webkit-autofill:focus{
+      -webkit-text-fill-color:#1c1917;
+      -webkit-box-shadow:0 0 0 40px #fff inset;
+      caret-color:#1c1917;
+    }
+    .nav-item{position:relative;transition:background .18s,color .18s,box-shadow .18s}
+    .nav-item.active{box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+    .nav-item.active::before{content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+      width:3px;height:56%;border-radius:0 4px 4px 0;background:var(--ouro-claro);
+      box-shadow:0 0 12px 1px rgba(224,171,28,.55)}
+    aside{position:relative}
+    aside::after{content:"";position:absolute;inset:0;pointer-events:none;
+      background:radial-gradient(120% 40% at 50% 0%, rgba(224,171,28,.07), transparent 70%)}
+    aside > *{position:relative;z-index:1}
+  
