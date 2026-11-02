@@ -1,2 +1,17 @@
-# Exclude bundled third-party JavaScript from language percentages.
+# Authored code and configuration: classify the real files, not frameworks.
+*.py linguist-language=Python
+app/static/js/*.jsx linguist-language=JavaScript
+app/static/js/*.js linguist-language=JavaScript
+app/static/css/*.css linguist-language=CSS
+app/static/index.html linguist-language=HTML
+*.sh linguist-language=Shell
+*.bat linguist-language=Batchfile
+Dockerfile linguist-language=Dockerfile
+
+# These are real data/configuration languages, normally omitted by Linguist.
+docker-compose.yml linguist-language=YAML linguist-detectable=true
+alembic.ini linguist-language=INI linguist-detectable=true
+app/static/manifest.json linguist-language=JSON linguist-detectable=true
+
+# Downloaded dependencies are not authored application source.
 app/static/vendor/** linguist-vendored=true
