@@ -1,0 +1,2 @@
+# Exclude bundled third-party JavaScript from language percentages.
+app/static/vendor/** linguist-vendored=true
