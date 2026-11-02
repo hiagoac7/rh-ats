@@ -1,9 +1,9 @@
 """
-Confere a sintaxe do front-end (app/static/index.html) sem precisar de navegador.
+Confere a sintaxe do front-end (app/static/js/app.jsx) sem precisar de navegador.
 
 Por que existe
 -------------
-O index.html e um arquivo unico com JSX compilado no navegador pelo Babel.
+O arquivo app/static/js/app.jsx contem o JSX compilado no navegador pelo Babel.
 Se houver um erro de sintaxe, NADA e desenhado: o usuario ve uma tela branca
 e nem a captura de erro do proprio sistema chega a montar.
 
@@ -29,7 +29,7 @@ import sys
 import tempfile
 
 ARQ = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                   "app", "static", "index.html")
+                   "app", "static", "js", "app.jsx")
 
 HTML = {
     "div", "span", "button", "input", "table", "thead", "tbody", "tfoot", "tr", "td", "th",
@@ -43,9 +43,7 @@ VAZIAS = {"img", "input", "br", "hr", "path", "circle", "rect", "line", "polylin
 
 def carregar():
     fonte = open(ARQ, encoding="utf-8").read()
-    ini = fonte.index('type="text/babel">') + len('type="text/babel">')
-    fim = fonte.index("</script>", ini)
-    return fonte[ini:fim], fonte[:ini].count("\n") + 1
+    return fonte, 1
 
 
 def pular(t: str, k: int) -> int:
