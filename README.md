@@ -1,4 +1,4 @@
-# ATS TLM — Sistema interno de Recrutamento & Seleção
+# Sistema de Recrutamento e Seleção (ATS) — TLM
 
 API em **Python + FastAPI** que substitui a planilha `Automacao_RH`.
 Passo a passo para rodar do zero.
