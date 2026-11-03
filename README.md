@@ -1,217 +1,85 @@
-# Sistema de Recrutamento e Seleção (ATS) — TLM
+# Sistema de Recrutamento e Seleção (ATS)
 
-API em **Python + FastAPI** que substitui a planilha `Automacao_RH`.
-Passo a passo para rodar do zero.
+**Aplicação web para organizar vagas, candidatos e etapas do processo seletivo.**
 
-## 1. Pré-requisitos
-- Python 3.11+ instalado.
+![Diagrama funcional do Sistema ATS](docs/images/visao-geral.svg)
 
-## 2. Instalar
-```bash
-cd rh_ats
+*Diagrama do funcionamento baseado no código; não é uma captura de tela.*
+
+[Início rápido](#início-rápido) · [Funcionalidades](#funcionalidades) · [Tecnologias](#tecnologias) · [Guia detalhado](docs/GUIA_DE_USO.md)
+
+## Funcionalidades
+
+- Cadastro e acompanhamento de vagas e candidatos.
+- Fila de parecer da gestão e indicadores do processo.
+- Autenticação JWT e permissões por perfil.
+- Listas configuráveis, histórico e auditoria.
+- Exportação para Excel e importação de planilha.
+- Atualizações em tempo real com Server-Sent Events (SSE).
+- SQLite no ambiente local e suporte a PostgreSQL, com migrações Alembic.
+
+## Tecnologias
+
+| Camada | Tecnologias |
+| --- | --- |
+| API | Python, FastAPI, Pydantic |
+| Interface | React, JavaScript/JSX, HTML, CSS, Tailwind CSS |
+| Dados | SQLAlchemy, SQLite, PostgreSQL, Psycopg |
+| Evolução do banco | Alembic |
+| Gráficos e planilhas | Chart.js, OpenPyXL |
+| Entrega | Docker, Docker Compose, scripts Shell e Batch |
+
+## Início rápido
+
+Requer Git e Python 3.11 ou superior. No Windows:
+
+```powershell
+git clone https://github.com/hiagoac7/rh-ats.git
+cd rh-ats
 python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# Linux/Mac:
-source .venv/bin/activate
-
-pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-## 2.1. Trazer as bibliotecas para dentro (faça isto uma vez)
+Defina uma `SECRET_KEY` própria no arquivo `.env`. Para uso local com SQLite, mantenha `DATABASE_URL` comentada como no exemplo.
 
-O front-end usa React, Babel, Tailwind e Chart.js. Por padrão eles seriam
-baixados da internet **a cada abertura de página** — o que significa tela
-branca sempre que a rede da empresa bloquear `unpkg.com`, ou o CDN sair do ar.
-
-```bash
-python -m scripts.baixar_bibliotecas     # Windows: baixar_bibliotecas.bat
+```powershell
+.\.venv\Scripts\python.exe -m scripts.baixar_bibliotecas
+.\.venv\Scripts\python.exe -m scripts.criar_admin "Administrador de exemplo" admin@example.com SUA_SENHA_FORTE RH
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1
 ```
 
-Isso grava os arquivos em `app/static/vendor/` e o sistema passa a servi-los
-sozinho. Precisa de internet **só nesse momento** — depois a pasta pode ser
-copiada para máquinas sem acesso externo.
+Substitua `SUA_SENHA_FORTE` por uma senha própria. O comando de criação pode atualizar um usuário já existente com o mesmo e-mail; utilize um banco de testes ao experimentar.
 
-Se você pular este passo o sistema continua funcionando: cada `<script>` tem
-uma linha de reserva que cai para a internet automaticamente. Você só fica
-dependente de rede externa.
+Abra a interface em **http://127.0.0.1:8000** e a documentação da API em **http://127.0.0.1:8000/docs**. No Linux/macOS, use `.venv/bin/python` no lugar do executável Windows.
 
-## 3. Importar os dados da planilha
-Coloque o arquivo `Automacao_RH_v17.xlsx` na pasta `rh_ats/` e rode:
-```bash
-python -m scripts.importar_planilha Automacao_RH_v17.xlsx
-```
-Isso cria o banco `rh_ats.db` (SQLite) e carrega vagas, candidatos, ciclos e gestores.
+## Como usar
 
-## 4. Subir a API
-```bash
-uvicorn app.main:app --reload
-```
-Abra a documentação interativa (testa tudo pelo navegador):
-- http://localhost:8000/docs
+1. Faça login com o usuário criado.
+2. Revise as listas e configurações utilizadas pelo processo.
+3. Cadastre as vagas e os candidatos.
+4. Acompanhe as etapas e os pareceres conforme o perfil de acesso.
+5. Consulte os indicadores e exporte os dados quando necessário.
 
-## 5. Endpoints principais
-| Método | Rota | O que faz |
-|---|---|---|
-| GET  | `/vagas` | lista vagas (filtros: `status`, `gestor_id`) |
-| POST | `/vagas` | cria vaga |
-| PATCH| `/vagas/{id}` | atualiza vaga |
-| GET  | `/candidatos` | lista/filtra (`vaga_id`, `status`, `etapa`) |
-| POST | `/candidatos` | cadastra candidato |
-| PATCH| `/candidatos/{id}` | atualiza parecer/etapa/status |
-| GET  | `/ciclos` | ciclos das vagas perenes (Vendedor/SDR) |
-| GET  | `/painel` | indicadores (calculado) |
-| GET  | `/fila-gestao` | candidatos aguardando parecer + dias parado |
-
-## 6. Ir para PostgreSQL (produção)
-```bash
-pip install "psycopg[binary]"
-export DATABASE_URL="postgresql+psycopg://usuario:senha@localhost:5432/rh_ats"
-```
-Nenhuma mudança de código é necessária — a mesma app roda em SQLite ou Postgres.
+A importação da planilha é opcional para quem precisa trazer dados anteriores. O [guia detalhado](docs/GUIA_DE_USO.md) preserva instruções de importação, endpoints, autenticação, PostgreSQL, migrações e backup.
 
 ## Estrutura
-```
-rh_ats/
-├── requirements.txt
-├── app/
-│   ├── main.py          # cria a app e registra as rotas
-│   ├── database.py      # conexão (SQLite/Postgres)
-│   ├── models.py        # tabelas (SQLAlchemy)
-│   ├── schemas.py       # validação de entrada/saída (Pydantic)
-│   └── routers/         # endpoints por área
-│       ├── vagas.py
-│       ├── candidatos.py
-│       ├── ciclos.py
-│       ├── painel.py    # indicadores calculados
-│       └── fila.py      # fila de parecer da gestão
-└── scripts/
-    └── importar_planilha.py
+
+```text
+app/                 API, modelos, regras e rotas
+app/static/          Interface e bibliotecas locais
+migrations/          Migrações do banco
+scripts/             Importação, manutenção e verificações
+docker-compose.yml   Configuração de serviços
+docs/                Guia de uso e visão funcional
 ```
 
----
+## Configuração e dados
 
-## 7. Autenticação e perfis
+Não publique `.env`, senhas, bancos de produção ou dados de candidatos. Configure a chave de assinatura dos tokens, o banco e os backups antes da implantação. As bibliotecas de interface podem ser servidas localmente por `app/static/vendor/`.
 
-O sistema usa **login com token JWT** e três perfis de acesso:
+Os comandos foram revisados a partir dos arquivos do projeto; a implantação completa e os fluxos de negócio não foram executados nesta atualização de apresentação.
 
-| Perfil | Pode fazer |
-|---|---|
-| **RH** | tudo: cadastrar/editar vagas e candidatos, ver painel/fila, **gerenciar usuários** |
-| **GESTOR** | dar parecer nos candidatos, ver vagas, painel e a fila de parecer |
-| **DIRETORIA** | somente leitura: vagas, candidatos, painel |
+## Outros projetos
 
-### Criar o primeiro usuário (admin RH)
-```bash
-python -m scripts.criar_admin "Vanessa RH" rh@tlmequipamentos.com.br SuaSenhaForte
-```
-
-### Fazer login
-`POST /auth/login` (formato `application/x-www-form-urlencoded`):
-- `username` = e-mail do usuário
-- `password` = senha
-
-Resposta traz `access_token`. Nas demais chamadas, envie o header:
-```
-Authorization: Bearer <access_token>
-```
-No `/docs`, clique em **Authorize** e faça login por lá — todas as rotas passam a ser testáveis autenticado.
-
-### Rotas de auth
-| Método | Rota | Perfil |
-|---|---|---|
-| POST | `/auth/login` | público |
-| GET  | `/auth/me` | autenticado |
-| GET  | `/auth/usuarios` | RH |
-| POST | `/auth/usuarios` | RH |
-
-### Segurança — o que configurar em produção
-Defina variáveis de ambiente (NÃO use os padrões em produção):
-```bash
-export SECRET_KEY="uma-chave-longa-e-aleatoria"   # assina os tokens
-export TOKEN_EXPIRE_MIN=480                        # validade do token (min)
-```
-As senhas são guardadas com hash PBKDF2-SHA256 (salgado). Tokens e hash usam só a
-biblioteca padrão do Python — se preferir, dá para trocar por `pyjwt` + `passlib[bcrypt]`
-mantendo a mesma interface em `app/security.py`.
-
----
-
-## 8. Banco em produção: PostgreSQL + migrations (Alembic)
-
-O sistema nasce em **SQLite** (um arquivo, zero instalação) e migra para **PostgreSQL**
-sem trocar código — só configuração. As mudanças de estrutura do banco passam a ser
-**versionadas com Alembic**, para o banco evoluir com segurança conforme o sistema cresce.
-
-### Por que isso importa
-- **SQLite**: ótimo para testar, mas não foi feito para várias pessoas gravando ao mesmo tempo.
-- **PostgreSQL**: aguenta acesso simultâneo, é o padrão para sistemas alimentados todo dia.
-- **Alembic**: quando você adicionar um campo (ex.: "telefone 2" no candidato) ou uma tabela,
-  gera um "passo de migração" que aplica a mudança **sem apagar os dados existentes**.
-
-### Passo a passo para ir ao PostgreSQL
-1. Instale o PostgreSQL e crie um banco (ex.: `rh_ats`) e um usuário.
-2. Copie `.env.example` para `.env` e ajuste a linha:
-   ```
-   DATABASE_URL=postgresql+psycopg://rh_user:senha_forte@localhost:5432/rh_ats
-   SECRET_KEY=uma-chave-longa-e-aleatoria
-   ```
-3. Crie a estrutura do banco (dois cliques em **`migrar.bat`**, ou):
-   ```
-   alembic upgrade head
-   ```
-4. Carregue os dados da planilha (uma vez) e crie os logins:
-   ```
-   python -m scripts.importar_planilha Automacao_RH_v17.xlsx
-   python -m scripts.criar_admin "Seu Nome" seu@email.com SuaSenha TI
-   ```
-5. Suba o sistema normalmente (`iniciar.bat`).
-
-### O fluxo do dia a dia quando mudar o banco
-Sempre que você alterar os models (adicionar/mudar um campo), rode:
-```
-alembic revision --autogenerate -m "descricao da mudanca"
-alembic upgrade head
-```
-- O primeiro comando **gera** o passo de migração comparando os models com o banco.
-- O segundo **aplica** a mudança. Os dados existentes são preservados.
-
-> No SQLite, o sistema ainda cria as tabelas sozinho ao iniciar (praticidade no
-> desenvolvimento). No PostgreSQL, quem cria e evolui o schema é o Alembic.
-
----
-
-## 9. O sistema é autossuficiente (a planilha pode ser aposentada)
-
-Tudo que a planilha fazia é feito pelo sistema:
-
-| Na planilha | No sistema |
-|---|---|
-| Abas CANDIDATOS / VAGAS | Telas de Candidatos e Vagas (criar, editar, excluir) |
-| Aba LISTAS | **Configurações** — cargos, origens, áreas, níveis, etapas... editáveis |
-| Aba PAINEL | **Relatórios** (com filtro de período) |
-| Aba FILA GESTÃO | **Fila Gestão** |
-| Abas CICLOS | Histórico de aberturas dentro da vaga + botão **Reabrir vaga** |
-| Aba DIVULGAÇÃO | **Divulgação** (sem senhas — use um gerenciador de senhas) |
-| O arquivo .xlsx em si | **Exportar Excel** + **backup.bat** |
-
-### Configurações (a nova aba LISTAS)
-Em **Configurações** você adiciona/renomeia/reordena os valores dos menus.
-Ao renomear um item de *Etapas* ou *Status do candidato*, o sistema atualiza
-automaticamente os registros que usavam o nome antigo — nada fica órfão.
-Desativar esconde o valor dos menus sem apagar o histórico.
-
-### Exportar para Excel
-Botão **Exportar Excel** na tela de Relatórios. Gera um .xlsx com as abas
-CANDIDATOS, VAGAS, ANOTAÇÕES, GESTORES, DIVULGAÇÃO, CANDIDATURAS, LISTAS e USUÁRIOS.
-Serve para conferência, envio à diretoria e para garantir que os dados nunca ficam presos.
-
-### Backup (importante)
-Os dados vivem no arquivo `rh_ats.db`. Faça backup com regularidade:
-
-- **`backup.bat`** — dois cliques, salva uma cópia datada na pasta `backups\`.
-- Feche o sistema antes de rodar, para copiar o banco sem uso.
-- Guarde uma cópia fora do computador (nuvem, HD externo).
-
-> Ao migrar para PostgreSQL (seção 8), o backup passa a ser feito pelo próprio
-> servidor de banco (`pg_dump`), que é o caminho recomendado para uso em rede.
+[Inventário Windows](https://github.com/hiagoac7/inventario-ti) · [Coletor Android](https://github.com/hiagoac7/coletor-dispositivos-android) · [Central de Suporte de TI](https://github.com/hiagoac7/Portal-Suporte)
